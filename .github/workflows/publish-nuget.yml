@@ -1,0 +1,40 @@
+name: Publish NuGet Packages
+
+on:
+  release:
+    types: [published]  # Triggers when a GitHub release is published
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Pack packages
+      run: dotnet pack --configuration Release --no-build --output ./nupkg
+      
+    - name: Publish Core package to NuGet first
+      run: dotnet nuget push ./nupkg/BlazorSignalProxyServices.Core.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      
+    - name: Wait for Core package to be indexed on NuGet
+      run: sleep 3600  # Wait 1 hour for NuGet indexing
+      shell: bash
+      
+    - name: Publish Client and Server packages to NuGet
+      run: |
+        dotnet nuget push ./nupkg/BlazorSignalProxyServices.Client.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        dotnet nuget push ./nupkg/BlazorSignalProxyServices.Server.*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
