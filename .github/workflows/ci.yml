@@ -33,16 +33,16 @@ jobs:
           ${{ runner.os }}-nuget-
     
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore -p:UseProjectReferences=true
     
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore -p:UseProjectReferences=true
     
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
     
     - name: Pack NuGet packages
-      run: dotnet pack --configuration Release --no-build --output ./packages
+      run: dotnet pack --configuration Release --no-build --output ./packages -p:UseProjectReferences=true
     
     - name: List generated packages
       run: ls -la ./packages/
