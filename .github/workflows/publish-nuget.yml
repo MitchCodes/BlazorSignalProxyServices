@@ -19,12 +19,12 @@ jobs:
         dotnet-version: '8.0.x'
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore -p:UseProjectReferences=true
       
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore -p:UseProjectReferences=true
       
-    - name: Pack packages
+    - name: Pack packages (use PackageReference for NuGet dependencies)
       run: dotnet pack --configuration Release --no-build --output ./nupkg
       
     - name: Publish Core package to NuGet first
